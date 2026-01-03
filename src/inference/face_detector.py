@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List, Tuple, Optional
 
 import cv2
 import numpy as np
@@ -18,11 +17,7 @@ class FaceBox:
 
 @dataclass
 class FaceBox:
-    """
-    1つの顔領域を表す矩形 (x, y, w, h)
-    x, y: 左上座標
-    w, h: 幅と高さ
-    """
+
     x: int
     y: int
     w: int
@@ -70,7 +65,8 @@ def detect_faces(image, bgr,
     return faces
     """
     
-    boxes: List[FaceBox] = [FaceBox(int(x), int(y), int(w), int(h)) for (x, y, w, h) in faces]
+    boxes = [FaceBox(int(x), int(y), int(w), int(h)) for (x, y, w, h) in faces]
+    
     return boxes
 
 def crop_faces(image, faces):
@@ -94,11 +90,11 @@ def crop_faces(image, faces):
 def detect_and_crop_largest_face(image, bgr, **detect_kwargs):
     
     boxes = detect_faces(image, bgr=bgr, **detect_kwargs)
-    print(boxes)
-    print(type(boxes))
+    #print(boxes)
+    #print(type(boxes))
     if not boxes:
         return None, None
-    print(f"boxes {boxes}")
+    #print(f"boxes {boxes}")
     largest = max(boxes, key=lambda b: b.w * b.h)
     (face_img,) = crop_faces(image, [largest])
 
@@ -111,8 +107,9 @@ if __name__ == "__main__":
     import os
 
     BASE_DIR = Path(__file__).resolve().parents[2]
-    image_path = BASE_DIR / "tests" / "face.jpg"
-    print(image_path)
+    TEST_DIR = BASE_DIR / "tests"
+    image_path = TEST_DIR / "face.jpg"
+    #print(image_path)
 
     if image_path is None or not os.path.exists(image_path):
         print("error 1")
@@ -127,7 +124,7 @@ if __name__ == "__main__":
         largest_box, face_img = detect_and_crop_largest_face(img, bgr=True)
         if largest_box is not None:
             print("Largest face:", largest_box)
-
-            os.makedirs("outputs", exist_ok=True)
-            cv2.imwrite("outputs/cropped_face.jpg", face_img)
+            #os.makedirs("outputs", exist_ok=True)
+            OUTPUT_DIR = TEST_DIR / "cropped_face.jpg"
+            cv2.imwrite(OUTPUT_DIR, face_img)
             print("Saved cropped face")

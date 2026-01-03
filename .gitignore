@@ -208,3 +208,4 @@ __marimo__/
 
 # for this project
 /tests/*
+/data/*
