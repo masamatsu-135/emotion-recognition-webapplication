@@ -9,6 +9,7 @@ import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as T
 
+
 class FER2013ResNetDataset(Dataset):
 
     def __init__(self, csv_path, usage="Training", transform=None):
@@ -21,8 +22,10 @@ class FER2013ResNetDataset(Dataset):
 
     def load_csv(self):
         if not self.csv_path.exists():
-            raise FileNotFoundError(f"CSV not found: {self.csv_path}")
-        
+            raise FileNotFoundError(
+                f"CSV not found: {self.csv_path}\n"
+                f"Resolved absolute path: {self.csv_path.resolve()}"
+    )
         with self.csv_path.open("r") as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -32,7 +35,7 @@ class FER2013ResNetDataset(Dataset):
                 label = int(row["emotion"])
 
                 pixels_str = row["pixels"]
-                pixels = np.fromstring(pixels_str, dtype=np.unit8, sep=" ")
+                pixels = np.fromstring(pixels_str, dtype=np.uint8, sep=" ")
 
                 pixels = pixels.reshape(48, 48)
 
@@ -61,7 +64,7 @@ class FER2013ResNetDataset(Dataset):
 def get_resnet_transforms(train=True):
 
     base_transforms = [
-        T.Grayscake(num_output_coannels=3),
+        T.Grayscale(num_output_channels=3),
         T.Resize((224, 224)),
     ]
 
@@ -83,4 +86,26 @@ def get_resnet_transforms(train=True):
     return T.Compose(base_transforms)
 
 if __name__ == "__main__":
-    pass
+    this_file = Path(__file__).resolve()
+    project_root = this_file.parents[2]
+
+    csv_path = project_root / "data/raw/fer2013.csv"
+
+    train_ds = FER2013ResNetDataset(
+        csv_path=csv_path,
+        usage="Training",
+        transform=get_resnet_transforms(train=True),
+    )
+
+    val_ds = FER2013ResNetDataset(
+        csv_path=csv_path,
+        usage="PublicTest",
+        transform=get_resnet_transforms(train=False),
+    )
+
+    print("Train size :", len(train_ds))
+    print("Val size   :", len(val_ds))
+
+    img, label = train_ds[0]
+    print("Image shape:", img.shape)
+    print("Label      :", label)
