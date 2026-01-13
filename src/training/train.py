@@ -21,7 +21,6 @@ try:
     from .dataset import FER2013ResNetDataset, get_resnet_transforms
     from .model import get_model
 except ImportError:
-    # ファイル直実行用フォールバック
     from dataset import FER2013ResNetDataset, get_resnet_transforms
     from model import get_model
 
